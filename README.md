@@ -26,3 +26,41 @@
 ```bash
 npm install @pipeletteio/nop
 ```
+
+## Example
+
+```javascript
+const { nop, isNop } = require('@pipeletteio/nop');
+
+isNop(nop); // => true
+
+isNop(function () {}); // => false
+```
+
+## API
+
+
+#### nop
+
+The nop function which will be used to replace the non cancellable callables.
+
+|   argument   |    type   | details |
+|--------------|-----------|---------|
+|    ...arg    |   any[]   | ...     |
+
+Return void.
+
+Example:
+```javascript
+new TimeMeter(process.hrtime());
+```
+
+#### isNop
+
+Check if the argument is the nop function.
+
+|   argument   |    type   |         details          |
+|--------------|-----------|--------------------------|
+|      arg     |    any    | The checked argument.    |
+
+Return a boolean.
