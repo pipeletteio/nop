@@ -1,5 +1,5 @@
 {
-  "name": "@pipeletteio/time-meter",
+  "name": "@pipeletteio/nop",
   "version": "1.0.0",
   "description": "A simple nop function helper",
   "private": true,
