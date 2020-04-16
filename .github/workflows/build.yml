@@ -1,0 +1,53 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - '**'
+    tags-ignore:
+      - '**'
+
+jobs:
+  tests:
+    name: Tests
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [12.x, 13.x]
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v1
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Install NPM dependencies
+        run: npm ci
+      - name: Run the build
+        run: npm run build
+      - name: Run test converage
+        run: npm run coverage
+
+  coverage:
+    if: contains(github.ref, 'master')
+    needs: [tests]
+    name: CodeClimate Coverage
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v1
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Install NPM dependencies
+        run: npm ci
+      - name: Runt test coverage
+        run: npm run coverage
+      - name: Report coverage to CodeClimate
+        uses: paambaati/codeclimate-action@v2.5.0
+        env:
+          CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+        with:
+          debug: true
+          coverageCommand: npm run coverage

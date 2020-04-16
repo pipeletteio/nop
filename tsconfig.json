@@ -1,0 +1,33 @@
+{
+  "compilerOptions": {
+    "outDir": "./build",
+    "target": "es6",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "lib": ["es5", "es6"],
+    "types": ["node", "jest"],
+    "pretty": true,
+    "declaration": true,
+    "sourceMap": false,
+    "removeComments": false,
+    "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "noUnusedLocals": true,
+    "importHelpers": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "strictNullChecks": true,
+    "downlevelIteration": true
+  },
+  "include": [
+    "src/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "build",
+    "cache",
+    "coverage",
+    "test"
+  ]
+}
