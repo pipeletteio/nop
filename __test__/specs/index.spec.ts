@@ -1,4 +1,4 @@
-import { nop, isNop } from '../../../src/index';
+import { nop, isNop } from '@/src/index';
 
 test('should nop not raised anything', () => {
   expect(nop).not.toThrow();
@@ -17,4 +17,5 @@ test('should isNop return false', () => {
   expect(isNop(1)).toBe(false);
   expect(isNop(function () {})).toBe(false);
   expect(isNop(isNop)).toBe(false);
+  expect(isNop(nop.bind(null))).toBe(false);
 });

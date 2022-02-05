@@ -2,7 +2,7 @@
   <p>@pipeletteio/nop</p>
 </h1>
 
-<p align="center">A simple nop function helper.</p>
+<p align="center">A simple nop (no-op) function helper. Nop is a function that does nothing.</p>
 
 <p align="center">
   <a alt="Build Status" href="https://github.com/pipeletteio/nop/actions?query=workflow">
@@ -30,15 +30,18 @@ npm install @pipeletteio/nop
 ## Example
 
 ```javascript
-const { nop, isNop } = require('@pipeletteio/nop');
+import { nop, isNop } from '@pipeletteio/nop';
+// const { nop, isNop } = require('@pipeletteio/nop');
 
 isNop(nop); // => true
 
 isNop(function () {}); // => false
 ```
 
-## API
+## Docs
+Read [documentation](https://pipeletteio.github.io/nop) for more informations.
 
+## API
 
 #### nop
 
@@ -49,11 +52,6 @@ The nop function which will be used to replace the non cancellable callables.
 |    ...arg    |   any[]   | ...     |
 
 Return void.
-
-Example:
-```javascript
-new TimeMeter(process.hrtime());
-```
 
 #### isNop
 

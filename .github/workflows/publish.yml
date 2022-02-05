@@ -2,70 +2,122 @@ name: Publish
 
 on:
   push:
-    branches-ignore:
-      - '**'
     tags:
       - v?[0-9]+.[0-9]+.[0-9]+
+      - v?[0-9]+.[0-9]+.[0-9]+-[a-z]+.[0-9]+
 
 jobs:
+  tag:
+    runs-on: ubuntu-20.04
+    outputs:
+      tag_name: ${{ steps.tag_name.outputs.tag_name }}
+    steps:
+      - id: tag_name
+        run: echo "::set-output name=tag_name::${GITHUB_REF/refs\/tags\//}"
+
   tests:
     name: Tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     strategy:
       matrix:
-        node-version: [12.x, 13.x]
+        node-version: [12.x, 14.x, 16.x, 17.x]
     steps:
       - name: Checkout the repository
-        uses: actions/checkout@v1
+        uses: actions/checkout@v2
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node-version }}
       - name: Install NPM dependencies
         run: npm ci
-      - name: Run the build
-        run: npm run build
-      - name: Run test converage
+      - name: Run types check
+        run: npm run type-check
+      - name: Run linter
+        run: npm run lint
+      - name: Run coverage
         run: npm run coverage
+      - name: Run the packaging
+        run: npm run package
 
   publish-npm:
     name: Publish on NPM
-    runs-on: ubuntu-latest
-    needs: [tests]
+    runs-on: ubuntu-20.04
+    needs: [tag, tests]
+    strategy:
+      matrix:
+        node-version: [16.x]
     steps:
       - name: Checkout the repository
-        uses: actions/checkout@v1
+        uses: actions/checkout@v2
       - name: Configure NPM registery with Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node-version }}
           registry-url: https://registry.npmjs.org/
       - name: Install NPM dependencies
         run: npm ci
-      - name: Run the build
-        run: npm run build
+      - name: Run the packaging
+        run: npm run package
       - name: Publish to NPM
-        run: npm run publishing --access public
+        run: |
+          tag_regex='^[0-9]+\.[0-9]+\.[0-9]+-([a-z]+)\.[0-9]+$'
+          tag_type=$([[ ${tag_name/refs\/tags\//} =~ ${tag_regex} ]] && echo ${BASH_REMATCH[1]} || echo '')
+          [[ ${tag_type} == "" ]] \
+            && npm run package:publish \
+            || npm run package:publish --tag "${tag_type}"
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          tag_name: ${{ needs.tag.outputs.tag_name }}
 
   publish-gpr:
     name: Publish on GPR
-    runs-on: ubuntu-latest
-    needs: [tests]
+    runs-on: ubuntu-20.04
+    needs: [tag, tests]
+    strategy:
+      matrix:
+        node-version: [16.x]
     steps:
       - name: Checkout the repository
-        uses: actions/checkout@v1
+        uses: actions/checkout@v2
       - name: Configure GPR registery with Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node-version }}
           registry-url: https://npm.pkg.github.com/
       - name: Install NPM dependencies
         run: npm ci
-      - name: Run the build
-        run: npm run build
+      - name: Run the packaging
+        run: npm run package
       - name: Publish to GPR
-        run: npm run publishing
+        run: |
+          tag_regex='^[0-9]+\.[0-9]+\.[0-9]+-([a-z]+)\.[0-9]+$'
+          tag_type=$([[ ${tag_name/refs\/tags\//} =~ ${tag_regex} ]] && echo ${BASH_REMATCH[1]} || echo '')
+          [[ ${tag_type} == "" ]] \
+            && npm run package:publish \
+            || npm run package:publish --tag "${tag_type}"
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          tag_name: ${{ needs.tag.outputs.tag_name }}
+
+  documentation:
+    name: Documentation
+    runs-on: ubuntu-20.04
+    needs: [tag, publish-npm, publish-gpr]
+    strategy:
+      matrix:
+        node-version: [16.x]
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v2
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v2
+      - name: Install NPM dependencies
+        run: npm ci
+      - name: Generate doc
+        run: npm run docs
+      - uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./build/docs
+          tag_name: "deploy-${{ needs.tag.outputs.tag_name }}"
+          tag_message: "Deployment ${{ needs.tag.outputs.tag_name }}"

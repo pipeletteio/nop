@@ -1,0 +1,30 @@
+{
+  "test": ".*.ts$",
+  "module": {
+    "type": "commonjs",
+    "strict": true,
+    "strictMode": true,
+    "lazy": false,
+    "noInterop": false
+  },
+  "jsc": {
+    "target": "es2015",
+    "transform": null,
+    "loose": false,
+    "parser": {
+      "syntax": "typescript",
+      "tsx": false,
+      "decorators": false,
+      "dynamicImport": false,
+      "baseUrl": ".",
+      "paths": {
+        "@/src/*": ["src/*"]
+      }
+    },
+    "minify": {
+      "compress": false,
+      "mangle": false
+    }
+  },
+  "sourceMaps": true
+}
