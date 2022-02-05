@@ -1,6 +1,6 @@
 {
   "name": "@pipeletteio/nop",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A simple nop function helper",
   "private": false,
   "main": "./src/index.js",
