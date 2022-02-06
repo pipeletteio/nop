@@ -32,7 +32,7 @@
     "docs": "npm run docs:clear && npm run docs:build",
     "docs:clear": "rm -rf build/docs",
     "docs:build": "typedoc --out build/docs --theme default src/index.ts",
-    "postinstall": "husky install config/husky",
+    "prepare": "husky install config/husky",
     "precommit": "npm run type-check && npm run lint && npm run coverage"
   },
   "devDependencies": {
